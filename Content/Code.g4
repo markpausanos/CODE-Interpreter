@@ -20,7 +20,7 @@ elseIfBlock: if_block | else_block;
 statement: assignment | function_call;
 
 assignment: DATA_TYPE variable (',' variable)*; 
-variable: IDENTIFIER ('=' (expression))?;
+variable: INT? IDENTIFIER? ('=' (expression))?;
 
 DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;

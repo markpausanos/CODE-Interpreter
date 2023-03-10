@@ -1,114 +1,52 @@
-﻿using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
+﻿using Antlr4.Runtime.Misc;
+using CODEInterpreter.Classes.ErrorHandling;
+using CODEInterpreter.Classes.Runtime;
 using CODEInterpreter.Content;
 
 namespace CODEInterpreter.Classes
 {
     public class CodeVisitor : CodeBaseVisitor<object?>
     {
-        bool _canExecute = false;
-        int _fileLength;
-
-        ValidTokensV1 _validTokens;
-
-        Stack<KeyValuePair<string, int>> _runtimeStack;
-        Dictionary<string, object?> _runtimeVariables;
+        RuntimeData _runtimeData;
+        private bool _canExecute = false;
+        private bool _canAssign = true;
         public CodeVisitor(CodeLexer codeLexer, int fileLength)
         {
-            _validTokens = new();
-            _runtimeStack = new();
-            _runtimeVariables = new();
-            _fileLength = fileLength;
+            _runtimeData = new RuntimeData(fileLength);
         }
-
-        // Helper Methods
-        private void ThrowError(int line, string message)
-        {
-            Console.WriteLine($"Error: Line {line}.");
-            Console.WriteLine("Details: " + message);
-            Environment.Exit(400);
-        }
-        private void PushToken(string token, int line)
-        {
-            _runtimeStack.Push(new KeyValuePair<string, int>(token, line));
-        }
-
-        // Visitor Methods
-
         public override object? VisitBegin_code([NotNull] CodeParser.Begin_codeContext context)
         {
-            CheckIfEnd(context.Start.Line);
             var begin = context.CODE();
 
             if (begin == null)
             {
-                ThrowError
-                    (
-                        context.Start.Line,
-                        $"Missing Token after BEGIN. Expected CODE, IF, WHILE."
-                    );
+                ErrorHandler.ThrowError
+                (context.Start.Line, $"Expected CODE, found none." );
             }
-            var contextLine = context.Start.Line;
+
             var beginText = begin.GetText();
 
-            if (!_validTokens.ValidBeginnables.Contains(beginText))
-            {
-                ThrowError
-                    (
-                        context.start.Line,
-                        $"Invalid token \"{begin.GetText()}\". Expected CODE, IF, WHILE."
-                    );
-            }
-            if (_runtimeStack.Count == 0 && !beginText.Equals("CODE"))
-            {
-                ThrowError
-                    (
-                        context.start.Line,
-                        "Code program must begin with BEGIN CODE."
-                    );
-            }
-
-            PushToken(beginText, context.Start.Line);
-            _canExecute = true;
-
+            _runtimeData.PushToken(beginText, context.Start.Line);
+            _canAssign = true;
             return null;
         }
         public override object? VisitEnd_code([NotNull] CodeParser.End_codeContext context)
         {
             var end = context.CODE();
 
+            if (!_canExecute)
+            {
+                ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
+            }
             if (end == null)
             {
-                ThrowError
-                    (
-                        context.Start.Line,
-                        $"Missing Token after END. Expected CODE."
-                    );
+                ErrorHandler.ThrowError
+                (context.Start.Line, $"Expected CODE, found none.");
             }
 
             var endText = end.GetText();
 
-            if (!_validTokens.ValidBeginnables.Contains(endText))
-            {
-                ThrowError
-                    (
-                        context.Start.Line,
-                        $"Invalid token \"{endText}\". Expected CODE."
-                    );
-            }
-
-            if (
-                !_canExecute ||
-                _runtimeStack.Count == 0 ||
-                _runtimeStack.Peek().Key == null ||
-                !_runtimeStack.Peek().Key!.Equals(endText)
-                )
-            {
-                ThrowError(context.Start.Line, $"END {endText} must match BEGIN {endText}.");
-            }
-
-            _runtimeStack.Pop();
-            CheckIfEnd(context.Start.Line);
+            _runtimeData.PopToken(endText, context.Start.Line);
 
             return null;
         }
@@ -123,45 +61,46 @@ namespace CODEInterpreter.Classes
 
         public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
         {
-            var variableDataType = context.DATA_TYPE().GetText();
+            var variableType = context.DATA_TYPE();
 
+            if (!_canExecute)
+            {
+                ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
+            }
+            if (!_canAssign)
+            {
+                ErrorHandler.ThrowError
+                (context.Start.Line, "Cannot assign variables after execution.");
+            }
+            if (variableType == null)
+            {
+                ErrorHandler.ThrowError
+                (context.Start.Line, "Expected DATA TYPE, found none.");
+            }
+
+            var variableDataType = variableType.GetText();
             var variables = context.variable();
+
             foreach (var variable in variables)
             {
-                Console.Write(variable.IDENTIFIER().GetText());
-                if (variable.expression() == null)
+                if (variable.INT() != null)
                 {
-                    continue;
+                    ErrorHandler.ThrowError
+                    (context.Start.Line, $"Unxpected symbol \"{variable.INT().GetText()}\".");
                 }
-                Console.WriteLine(" " + variable.expression().GetText());
-            }
-            foreach (var variable in variables)
-            {
-                if (_validTokens.ValidReservedKeywords.Contains(variable.IDENTIFIER().GetText()))
+                if (variable.IDENTIFIER() == null)
                 {
-                    ThrowError
-                        (
-                            context.Start.Line, 
-                            $"{variable.GetText()} is a KEYWORD. Cannot use KEYWORDS for variable names."
-                        );
+                    ErrorHandler.ThrowError
+                    (context.Start.Line, "Expected IDENTIFIER, found none.");
                 }
-                Console.Write(variable.GetText());
+
+                var variableName = variable.IDENTIFIER().GetText();
+                var variableValue = variable.expression() == null ? null : variable.expression().GetText();
+
+                _runtimeData.AddVariable(variableDataType, variableName, variableValue, context.Start.Line);
             }
+   
             return null;
-        }
-        public void CheckIfEnd(int line)
-        {
-            if (line == _fileLength && _runtimeStack.Count != 0)
-            {
-                while (_runtimeStack.Count != 0)
-                {
-                    var kv = _runtimeStack.Peek();
-                    var end = kv.Key;
-                    var errorLine = kv.Value;
-                    ThrowError(errorLine, $"END {end} must match BEGIN {end}.");
-                    _runtimeStack.Pop();
-                }
-            }
         }
     }
 }

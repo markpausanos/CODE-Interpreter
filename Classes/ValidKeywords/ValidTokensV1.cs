@@ -1,16 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CODEInterpreter.Classes
+﻿namespace CODEInterpreter.Classes.ValidKeywords
 {
     public class ValidTokensV1
     {
-        public List<string> ValidBeginnables 
-        { 
-            get 
+        public List<string> ValidDataTypes
+        {
+            get
+            {
+                return new List<string>
+                {
+                    "INT",
+                    "CHAR",
+                    "BOOL",
+                    "FLOAT"
+                };
+            }
+        }
+        public List<string> ValidBeginnables
+        {
+            get
             {
                 return new List<string>
                 {
@@ -18,8 +25,8 @@ namespace CODEInterpreter.Classes
                     "IF",
                     "WHILE"
                 };
-            } 
-         }
+            }
+        }
         public List<string> ValidProcedures
         {
             get
@@ -36,6 +43,7 @@ namespace CODEInterpreter.Classes
             get
             {
                 return new List<string>()
+                    .Concat(ValidDataTypes)
                     .Concat(ValidBeginnables)
                     .Concat(ValidProcedures)
                     .ToList()
