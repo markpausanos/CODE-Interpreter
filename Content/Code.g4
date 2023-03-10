@@ -2,43 +2,39 @@
 
 program: line* EOF;
 
+line: code_block | if_block | statement;
 
-line: statement | ifBlock | whileBlock;
+begin_code: 'BEGIN' CODE;
+end_code: 'END' CODE;
+code_block: begin_code line* end_code;
+CODE: 'CODE';
 
-statement: block | assignment | functionCall;
+if_block: 'IF' '(' expression ')' else_block ('ELSE' elseIfBlock)*;
+begin_if: 'BEGIN' IF;
+end_if: 'END' IF;
+else_block: begin_if line* end_if;
+IF: 'IF';
 
-ifBlock: 'IF' expression block ('ELSE' elseIfBlock);
-elseIfBlock: block | ifBlock;
+elseIfBlock: if_block | else_block;
 
-whileBlock: 'WHILE' expression block;
+statement: assignment | function_call;
 
-assignment: DATA_TYPE IDENTIFIER ('=' expression)? (',' IDENTIFIER ('=' expression)?)*; 
+assignment: DATA_TYPE variable (',' variable)*; 
+variable: IDENTIFIER ('=' (expression))?;
 
-functionCall: IDENTIFIER ':' expression;
-
-expression
-    : constant                                      #constantExpression
-    | IDENTIFIER                                    #identifierExpression
-    ;
-
-begin: ('BEGIN ') BEGINNABLE;
-end: ('END ') BEGINNABLE;
-
-block: begin line* end;
-
-constant: INT | CHAR | BOOL | FLOAT;
-
-DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT' | WORD;
-
+DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
-
-INT: [0-9]+;
+INT: [0-9]+;    
 CHAR: '\'' ~ '\'' '\'';
 BOOL: ('"' 'TRUE' '"') | ('"' 'FALSE' '"');
-FLOAT: [0-9]+ ('.' [0-9]+)?;
-Space: ' ' -> skip;
-BEGINNABLE: 'CODE' | 'IF' | 'WHILE' ;
-SYMBOL: ('!'|'?'|':'|'.'|'/'|'*')*;
-WORD : ('a'..'z' | 'A'..'Z')+;
-DIGIT: ('0'..'9')*;
-NEWLINE : '\r'? '\n' | '\r';
+FLOAT: [0-9]+ '.' [0-9]+?;
+constant: INT | CHAR | BOOL | FLOAT;
+expression
+    : constant              #constantExpression
+    | '(' expression ')'    #parenthesizedExpression
+    ;
+
+function_call: IDENTIFIER ':' expression;
+
+COMMENT: '#' ~[\r\n]* -> skip;
+WS: [ \t\r\n]+ -> skip;
