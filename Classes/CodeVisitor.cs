@@ -50,10 +50,12 @@ namespace CODEInterpreter.Classes
 
             return null;
         }
+
         public override object? VisitIf_block([NotNull] CodeParser.If_blockContext context)
         {
             return base.VisitIf_block(context);
         }
+
         public override object? VisitElse_block([NotNull] CodeParser.Else_blockContext context)
         {
             return base.VisitElse_block(context);

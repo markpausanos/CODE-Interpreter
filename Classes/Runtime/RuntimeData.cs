@@ -9,6 +9,7 @@ namespace CODEInterpreter.Classes.Runtime
         private Dictionary<string, object?> _runtimeVariables;
         private ValidTokensV1 _validTokensV1;
         private int _fileLength;
+
         public RuntimeData(int fileLength)
         {
             _runtimeStack = new Stack<KeyValuePair<string, int>>();
@@ -16,6 +17,7 @@ namespace CODEInterpreter.Classes.Runtime
             _validTokensV1 = new ValidTokensV1();
             _fileLength = fileLength;
         }
+
         public void PushToken(string token, int line)
         {
             CheckIfEnd(line);
@@ -52,6 +54,7 @@ namespace CODEInterpreter.Classes.Runtime
             CheckIfEnd(line);
             _runtimeStack.Pop();
         }
+
         public void AddVariable(string dataType, string name, object? value, int line)
         {
             if (_validTokensV1.ValidReservedKeywords.Contains(name))
@@ -71,6 +74,7 @@ namespace CODEInterpreter.Classes.Runtime
 
             _runtimeVariables.Add(name, value);
         }
+
         public void CheckIfEnd(int line)
         {
             if (line == _fileLength && _runtimeStack.Count != 0)
