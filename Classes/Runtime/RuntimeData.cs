@@ -17,7 +17,6 @@ namespace CODEInterpreter.Classes.Runtime
             _validTokensV1 = new ValidTokensV1();
             _fileLength = fileLength;
         }
-
         public void PushToken(string token, int line)
         {
             CheckIfEnd(line);
@@ -35,7 +34,6 @@ namespace CODEInterpreter.Classes.Runtime
 
             _runtimeStack.Push(new KeyValuePair<string, int>(token, line));
         }
-
         public void PopToken(string token, int line)
         {
             if (!_validTokensV1.ValidBeginnables.Contains(token))
@@ -51,10 +49,9 @@ namespace CODEInterpreter.Classes.Runtime
                 ErrorHandler.ThrowError(line, $"BEGIN {token} not found.");
             }
 
-            CheckIfEnd(line);
             _runtimeStack.Pop();
+            CheckIfEnd(line);
         }
-
         public void AddVariable(string dataType, string name, object? value, int line)
         {
             if (_validTokensV1.ValidReservedKeywords.Contains(name))
@@ -74,7 +71,14 @@ namespace CODEInterpreter.Classes.Runtime
 
             _runtimeVariables.Add(name, value);
         }
-
+        public bool CheckVariableExists(string identifier)
+        {
+            return _runtimeVariables.ContainsKey(identifier);
+        }
+        public object? GetValue(string identifier)
+        {
+            return _runtimeVariables[identifier];
+        }
         public void CheckIfEnd(int line)
         {
             if (line == _fileLength && _runtimeStack.Count != 0)

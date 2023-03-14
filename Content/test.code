@@ -1,3 +1,4 @@
 BEGIN CODE
-INT x=5,1,z
+INT x = -1, y
+x y 1
 END CODE
