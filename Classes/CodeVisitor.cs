@@ -9,13 +9,13 @@ namespace CODEInterpreter.Classes
     public class CodeVisitor : CodeBaseVisitor<object?>
     {
         RuntimeData _runtimeData;
-        ValueCalculator _valueCalculator;
+        RuntimeCalculator _valueCalculator;
         private bool _canExecute = false;
         private bool _canDeclare = true;
         public CodeVisitor(CodeLexer codeLexer, int fileLength)
         {
             _runtimeData = new RuntimeData(fileLength);
-            _valueCalculator = new ValueCalculator();
+            _valueCalculator = new RuntimeCalculator();
         }
         public override object? VisitBegin_code([NotNull] CodeParser.Begin_codeContext context)
         {
@@ -119,6 +119,10 @@ namespace CODEInterpreter.Classes
             
             return base.VisitAssignment(context);
         }
+        public override object? VisitFunction_call([NotNull] CodeParser.Function_callContext context)
+        {
+            return base.VisitFunction_call(context);
+        }
         public override object? VisitConstant([NotNull] CodeParser.ConstantContext context)
         {
             if (context.INT() != null)
@@ -155,6 +159,21 @@ namespace CODEInterpreter.Classes
 
             return _runtimeData.GetValue(variableName);
 ;       }
+        public override object? VisitMultiplyExpression([NotNull] CodeParser.MultiplyExpressionContext context)
+        {
+            var left = Visit(context.expression(0));
+            var right = Visit(context.expression(1));
+            var op = context.multiply_op().GetText();
+            
+            //TODO: Add calcs for multiply
+            return op switch
+            {
+                "+" => _valueCalculator.Add(left, right, context.Start.Line),
+                "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
+                "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
+                _ => ErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
+            };
+        }
         public override object? VisitAddExpression([NotNull] CodeParser.AddExpressionContext context)
         {
             var left = Visit(context.expression(0));
@@ -166,6 +185,7 @@ namespace CODEInterpreter.Classes
                 "+" => _valueCalculator.Add(left, right, context.Start.Line),
                 "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
                 "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
+                // TODO: Concatenate
                 _ => ErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
             };
         }

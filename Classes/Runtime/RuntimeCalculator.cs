@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CODEInterpreter.Classes.ValidKeywords
 {
-    public class ValueCalculator
+    public class RuntimeCalculator
     {
         public object? Add(object? left, object? right, int line)
         {
