@@ -1,6 +1,6 @@
 ﻿grammar Code;
 
-program: line* EOF;
+program: code_block EOF;
 
 line: code_block | if_block | statement;
 
@@ -29,13 +29,13 @@ DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 INT: ('-')?[0-9]+;    
 CHAR: '\'' ~ '\'' '\'';
+STRING: '\"' . '\"';
 BOOL: ('"' 'TRUE' '"') | ('"' 'FALSE' '"');
 FLOAT: ('-')?[0-9]+ '.' [0-9]+?;
 constant: INT | CHAR | BOOL | FLOAT;
 expression
     : constant                                      #constantExpression
     | IDENTIFIER                                    #identifierExpression
-    | function_call                                 #function_callExpression
     | 'NOT' expression                              #notExpression
     | '(' expression ')'                            #parenthesizedExpression
     | '[' expression ']'                            #bracketizedExpression
