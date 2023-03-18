@@ -20,19 +20,20 @@ elseIfBlock: if_block | else_block;
 statement: declaration | assignment | function_call;
 
 declaration: DATA_TYPE variable (',' variable)*;
-variable: IDENTIFIER? ('=' (expression))?;
-assignment: variable (',' variable)* ('=' expression);
-function_call: FUNCTION ':' expression;
+variable: IDENTIFIER ('=' (expression))?;
+assignment: IDENTIFIER ('=' IDENTIFIER)* '=' expression;
+function_call: IDENTIFIER? ':' expression;
 
-FUNCTION: 'DISPLAY' | 'SCAN';
 DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
-INT: ('-')?[0-9]+;    
+INT: [0-9]+;    
 CHAR: '\'' ~ '\'' '\'';
-STRING: '\"' . '\"';
+STRING: '"' . '"';
 BOOL: ('"' 'TRUE' '"') | ('"' 'FALSE' '"');
-FLOAT: ('-')?[0-9]+ '.' [0-9]+?;
-constant: INT | CHAR | BOOL | FLOAT;
+FLOAT: [0-9]+ '.' [0-9]+?;
+UNARY: '+' | '-';
+
+constant: INT | CHAR | BOOL | FLOAT | STRING;
 expression
     : constant                                      #constantExpression
     | IDENTIFIER                                    #identifierExpression
@@ -43,6 +44,7 @@ expression
     | expression add_op expression                  #addExpression
     | expression compare_op expression              #compareExpression
     | expression bool_op expression                 #boolExpression
+    | UNARY expression                              #unaryExpression
     ;
 
 multiply_op: '*' | '/' | '%';

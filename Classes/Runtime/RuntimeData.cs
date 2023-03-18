@@ -1,4 +1,5 @@
-﻿using CODEInterpreter.Classes.ErrorHandling;
+﻿using Antlr4.Runtime;
+using CODEInterpreter.Classes.ErrorHandling;
 using CODEInterpreter.Classes.ValidKeywords;
 
 namespace CODEInterpreter.Classes.Runtime
@@ -74,6 +75,15 @@ namespace CODEInterpreter.Classes.Runtime
         public bool CheckVariableExists(string identifier)
         {
             return _runtimeVariables.ContainsKey(identifier);
+        }
+        public void AssignVariable(string identifier, object? value, int line)
+        {
+            if (!_runtimeVariables.ContainsKey(identifier))
+            {
+                ErrorHandler.ThrowError(line, $"Variable {identifier} not found.");
+            }
+
+            _runtimeVariables[identifier] = value;
         }
         public object? GetValue(string identifier)
         {

@@ -10,15 +10,23 @@ namespace CODEInterpreter.Classes
     {
         RuntimeData _runtimeData;
         RuntimeCalculator _valueCalculator;
+        RuntimeFunction _runtimeFunction;
+        private bool _hasExecutedOnce = false;
         private bool _canExecute = false;
-        private bool _canDeclare = true;
+        private bool _canDeclare = false;
         public CodeVisitor(CodeLexer codeLexer, int fileLength)
         {
             _runtimeData = new RuntimeData(fileLength);
             _valueCalculator = new RuntimeCalculator();
+            _runtimeFunction = new RuntimeFunction();
         }
         public override object? VisitBegin_code([NotNull] CodeParser.Begin_codeContext context)
         {
+            if (_canExecute)
+            {
+                ErrorHandler.ThrowError
+                (context.Start.Line, $"BEGIN CODE already declared.");
+            }
             var begin = context.CODE();
 
             if (begin == null)
@@ -29,14 +37,19 @@ namespace CODEInterpreter.Classes
 
             var beginText = begin.GetText();
 
-            _runtimeData.PushToken(beginText, context.Start.Line);
             _canExecute = true;
+            _canDeclare = true;
             return null;
         }
         public override object? VisitEnd_code([NotNull] CodeParser.End_codeContext context)
         {
             var end = context.CODE();
 
+            if (_hasExecutedOnce)
+            {
+                ErrorHandler.ThrowError
+                (context.Start.Line, "Another CODE block found, only one can exist in one file.");
+            }
             if (!_canExecute)
             {
                 ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
@@ -49,8 +62,10 @@ namespace CODEInterpreter.Classes
 
             var endText = end.GetText();
 
-            _runtimeData.PopToken(endText, context.Start.Line);
+            _hasExecutedOnce = true;
             _canExecute = false;
+            _canDeclare = false;
+
             return null;
         }
         public override object? VisitIf_block([NotNull] CodeParser.If_blockContext context)
@@ -112,15 +127,28 @@ namespace CODEInterpreter.Classes
             {
                 ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
             }
+            if (context.expression() == null)
+            {
+                ErrorHandler.ThrowError(context.Start.Line, "Value not found.");
+            }
 
-            var variables = context.variable();
-            var expression = context.expression();
+            var identifiers = context.IDENTIFIER();
+            var value = Visit(context.expression());
             
+            foreach (var identifier in identifiers)
+            {
+                if (identifier == null)
+                {
+                    ErrorHandler.ThrowError(context.Start.Line, "Identifier not found.");
+                }
+                _runtimeData.AssignVariable(identifier.GetText(), value, context.Start.Line);
+            }
             
             return base.VisitAssignment(context);
         }
         public override object? VisitFunction_call([NotNull] CodeParser.Function_callContext context)
         {
+            _runtimeFunction.CallMethod(context.IDENTIFIER().GetText());
             return base.VisitFunction_call(context);
         }
         public override object? VisitConstant([NotNull] CodeParser.ConstantContext context)
