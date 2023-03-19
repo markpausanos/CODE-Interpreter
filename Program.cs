@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using CODEInterpreter.Classes;
 using CODEInterpreter.Classes.ErrorHandling;
+using CODEInterpreter.Classes.Visitor;
 using CODEInterpreter.Content;
 
 var testFileName = "D:\\College\\BSCS\\CS Year 3\\CS SECOND SEM\\CS322 - Programming Languages\\CODEInterpreter\\Content\\test.code";
@@ -15,5 +16,5 @@ var codeParser = new CodeParser(commonTokenStream);
 codeParser.RemoveErrorListeners();
 codeParser.AddErrorListener(new CodeErrorListener());
 var codeContext = codeParser.program();
-var visitor = new CodeVisitor(codeLexer, fileLines);
+var visitor = new CodeVisitor();
 visitor.Visit(codeContext);
