@@ -4,37 +4,6 @@ namespace CODEInterpreter.Classes.ValidKeywords
 {
     public class RuntimeCalculator
     {
-        private string GetTypeObject(object? obj)
-        {
-            if (obj is int)
-            {
-                return "INT";
-            }
-            else if (obj is float)
-            {
-                return "FLOAT";
-            }
-            else if (obj is char)
-            {
-                return "CHAR";
-            }
-            else if (obj is bool)
-            {
-                return "BOOL";
-            }
-            else
-            {
-                return "NULL";
-            }
-        }
-        private void ThrowErrorInCalculator(object? left, object? right, string symbol, int line)
-        {
-            string leftType = GetTypeObject(left);
-            string rightType = GetTypeObject(right);
-
-            CodeErrorHandler.ThrowError
-            (line, $"Unsupported operand '{symbol}' for types {leftType} and {rightType}");
-        }
         public object? Add(object? left, object? right, int line)
         {
             if (left is int l && right is int r)
@@ -57,7 +26,11 @@ namespace CODEInterpreter.Classes.ValidKeywords
                 return lFloat + rInt;
             }
 
-            ThrowErrorInCalculator(left, right, "+", line);
+            string leftErrorText = left is null ? "null" : left.GetType().ToString();
+            string rightErrorText = right is null ? "null" : right.GetType().ToString();
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand '+' for types {leftErrorText} and {rightErrorText}");
 
             return null;
         }
@@ -83,7 +56,11 @@ namespace CODEInterpreter.Classes.ValidKeywords
                 return lFloat - rInt;
             }
 
-            ThrowErrorInCalculator(left, right, "-", line);
+            string leftErrorText = left is null ? "null" : left.GetType().ToString();
+            string rightErrorText = right is null ? "null" : right.GetType().ToString();
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand '-' for types {leftErrorText} and {rightErrorText}");
 
             return null;
         }
@@ -109,7 +86,11 @@ namespace CODEInterpreter.Classes.ValidKeywords
                 return lFloat % rInt;
             }
 
-            ThrowErrorInCalculator(left, right, "%", line);
+            string leftErrorText = left is null ? "null" : left.GetType().ToString();
+            string rightErrorText = right is null ? "null" : right.GetType().ToString();
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand '%' for types {leftErrorText} and {rightErrorText}");
 
             return null;
         }
@@ -119,8 +100,11 @@ namespace CODEInterpreter.Classes.ValidKeywords
             {
                 return left.ToString() + right.ToString();
             }
+            string leftErrorText = left is null ? "null" : left.GetType().ToString();
+            string rightErrorText = right is null ? "null" : right.GetType().ToString();
 
-            ThrowErrorInCalculator(left, right, "&", line);
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand '%' for types {leftErrorText} and {rightErrorText}");
 
             return null;
         }

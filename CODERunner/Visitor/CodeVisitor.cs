@@ -96,21 +96,20 @@ namespace CODEInterpreter.Classes.Visitor
             {
                 return int.Parse(context.INT().GetText());
             }
+
             if (context.CHAR() != null)
             {
                 return char.Parse(context.CHAR().GetText()[1..^1]);
             }
+
             if (context.FLOAT() != null)
             {
                 return float.Parse(context.FLOAT().GetText());
             }
+
             if (context.BOOL() != null)
             {
                 return context.BOOL().GetText()[1..^1].Equals("TRUE");
-            }
-            if (context.STRING() != null)
-            {
-                return context.STRING().GetText()[1..^1];
             }
 
             return null;
@@ -126,10 +125,6 @@ namespace CODEInterpreter.Classes.Visitor
             }
 
             return _runtimeData.GetValue(variableName);
-        }
-        public override object? VisitParenthesizedExpression([NotNull] CodeParser.ParenthesizedExpressionContext context)
-        {
-            return Visit(context.expression());
         }
         public override object? VisitMultiplyExpression([NotNull] CodeParser.MultiplyExpressionContext context)
         {
