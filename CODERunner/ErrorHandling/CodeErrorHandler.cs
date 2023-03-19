@@ -4,7 +4,7 @@
     {
         public static object? ThrowError(int line, string message)
         {
-            Console.WriteLine($"Sematic Error: Line {line}.");
+            Console.WriteLine($"Error: Line {line}.");
             Console.WriteLine("Details: " + message);
             Environment.Exit(400);
 

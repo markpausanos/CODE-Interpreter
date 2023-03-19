@@ -1,36 +1,27 @@
-﻿using Antlr4.Runtime;
-using CODEInterpreter.Classes.ErrorHandling;
+﻿using CODEInterpreter.Classes.ErrorHandling;
 using CODEInterpreter.Classes.ValidKeywords;
+using CODEInterpreter.CODERunner.Class;
 
 namespace CODEInterpreter.Classes.Runtime
 {
     public class RuntimeData
     {
         private Stack<KeyValuePair<string, int>> _runtimeStack;
-        private Dictionary<string, object?> _runtimeVariables;
+        private Dictionary<string, Variable> _runtimeVariables;
         private ValidTokensV1 _validTokensV1;
-        private int _fileLength;
 
-        public RuntimeData(int fileLength)
+        public RuntimeData()
         {
             _runtimeStack = new Stack<KeyValuePair<string, int>>();
-            _runtimeVariables = new Dictionary<string, object?>();
+            _runtimeVariables = new Dictionary<string, Variable>();
             _validTokensV1 = new ValidTokensV1();
-            _fileLength = fileLength;
         }
         public void PushToken(string token, int line)
         {
-            CheckIfEnd(line);
-
             if (!_validTokensV1.ValidBeginnables.Contains(token))
             {
                 CodeErrorHandler.ThrowError
                 (line, $"Invalid token BEGIN \"{token}\".");
-            }
-            if (_runtimeStack.Count == 0 && !token.Equals("CODE"))
-            {
-                CodeErrorHandler.ThrowError
-                (line, "Expected BEGIN CODE, found none.");
             }
 
             _runtimeStack.Push(new KeyValuePair<string, int>(token, line));
@@ -51,7 +42,6 @@ namespace CODEInterpreter.Classes.Runtime
             }
 
             _runtimeStack.Pop();
-            CheckIfEnd(line);
         }
         public void AddVariable(string dataType, string name, object? value, int line)
         {
@@ -70,7 +60,7 @@ namespace CODEInterpreter.Classes.Runtime
                 CodeErrorHandler.ThrowError(line, $"Invalid data type \"{dataType}\".");
             }
 
-            _runtimeVariables.Add(name, value);
+            _runtimeVariables.Add(name, new Variable(name, value, dataType, line));
         }
         public bool CheckVariableExists(string identifier)
         {
@@ -83,25 +73,11 @@ namespace CODEInterpreter.Classes.Runtime
                 CodeErrorHandler.ThrowError(line, $"Variable {identifier} not found.");
             }
 
-            _runtimeVariables[identifier] = value;
+            _runtimeVariables[identifier].AssignVariable(value);
         }
         public object? GetValue(string identifier)
         {
-            return _runtimeVariables[identifier];
-        }
-        public void CheckIfEnd(int line)
-        {
-            if (line == _fileLength && _runtimeStack.Count != 0)
-            {
-                while (_runtimeStack.Count != 0)
-                {
-                    var kv = _runtimeStack.Peek();
-                    var token = kv.Key;
-                    var errorLine = kv.Value;
-                    CodeErrorHandler.ThrowError
-                    (errorLine, $"BEGIN {token} must match END {token} or vice versa.");
-                }
-            }
+            return _runtimeVariables[identifier].Value;
         }
     }
 }

@@ -1,9 +1,4 @@
 ﻿using CODEInterpreter.Classes.ErrorHandling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CODEInterpreter.Classes.ValidKeywords
 {
@@ -91,6 +86,20 @@ namespace CODEInterpreter.Classes.ValidKeywords
                 return lFloat % rInt;
             }
 
+            string leftErrorText = left is null ? "null" : left.GetType().ToString();
+            string rightErrorText = right is null ? "null" : right.GetType().ToString();
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand '%' for types {leftErrorText} and {rightErrorText}");
+
+            return null;
+        }
+        public object? Concatenation(object? left, object? right, int line)
+        {
+            if (left is object && right is object)
+            {
+                return left.ToString() + right.ToString();
+            }
             string leftErrorText = left is null ? "null" : left.GetType().ToString();
             string rightErrorText = right is null ? "null" : right.GetType().ToString();
 

@@ -19,12 +19,12 @@ elseIfBlock: if_block | else_block;
 
 statement: declaration | assignment | function_call;
 
-declaration: DATA_TYPE variable (',' variable)* NEWLINE;
+declaration: IDENTIFIER variable (',' variable)* NEWLINE;
 variable: IDENTIFIER ('=' (expression))?;
 assignment: IDENTIFIER ('=' IDENTIFIER)* '=' expression NEWLINE;
-function_call: IDENTIFIER ':' expression NEWLINE;
+function_call: IDENTIFIER ':' arguments NEWLINE;
+arguments : (IDENTIFIER (',' IDENTIFIER)*) | expression;
 
-DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 INT: [0-9]+;    
 CHAR: '\'' ~ '\'' '\'';
@@ -40,17 +40,19 @@ expression
     | 'NOT' expression                              #notExpression
     | '(' expression ')'                            #parenthesizedExpression
     | '[' expression ']'                            #bracketizedExpression
+    | UNARY expression                              #unaryExpression
     | expression multiply_op expression             #multiplyExpression
     | expression add_op expression                  #addExpression
     | expression compare_op expression              #compareExpression
     | expression bool_op expression                 #boolExpression
-    | UNARY expression                              #unaryExpression
+    | expression concat_op expression               #concatExpression
     ;
 
 multiply_op: '*' | '/' | '%';
 add_op: '+' | '-';
 compare_op: '>' | '<' | '>=' | '<=' | '==' | '<>';
 bool_op: 'AND' | 'OR';
+concat_op: '&';
 
 COMMENT: '#' ~[\r\n]* NEWLINE -> skip;
 NEWLINE   : '\r'? '\n';
