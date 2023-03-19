@@ -24,12 +24,12 @@ namespace CODEInterpreter.Classes.Runtime
 
             if (!_validTokensV1.ValidBeginnables.Contains(token))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (line, $"Invalid token BEGIN \"{token}\".");
             }
             if (_runtimeStack.Count == 0 && !token.Equals("CODE"))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (line, "Expected BEGIN CODE, found none.");
             }
 
@@ -39,7 +39,7 @@ namespace CODEInterpreter.Classes.Runtime
         {
             if (!_validTokensV1.ValidBeginnables.Contains(token))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (line, $"Invalid token END \"{token}\".");
             }
             if (_runtimeStack.Count == 0  || 
@@ -47,7 +47,7 @@ namespace CODEInterpreter.Classes.Runtime
                 !_runtimeStack.Peek().Key!.Equals(token)
                 )
             {
-                ErrorHandler.ThrowError(line, $"BEGIN {token} not found.");
+                CodeErrorHandler.ThrowError(line, $"BEGIN {token} not found.");
             }
 
             _runtimeStack.Pop();
@@ -57,17 +57,17 @@ namespace CODEInterpreter.Classes.Runtime
         {
             if (_validTokensV1.ValidReservedKeywords.Contains(name))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (line, "Cannot use KEYWORD as IDENTIFIER.");
             }
             if (_runtimeVariables.ContainsKey(name))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (line, $"Variable {name} already defined.");
             }
             if (!_validTokensV1.ValidDataTypes.Contains(dataType.Trim()))
             {
-                ErrorHandler.ThrowError(line, $"Invalid data type \"{dataType}\".");
+                CodeErrorHandler.ThrowError(line, $"Invalid data type \"{dataType}\".");
             }
 
             _runtimeVariables.Add(name, value);
@@ -80,7 +80,7 @@ namespace CODEInterpreter.Classes.Runtime
         {
             if (!_runtimeVariables.ContainsKey(identifier))
             {
-                ErrorHandler.ThrowError(line, $"Variable {identifier} not found.");
+                CodeErrorHandler.ThrowError(line, $"Variable {identifier} not found.");
             }
 
             _runtimeVariables[identifier] = value;
@@ -98,7 +98,7 @@ namespace CODEInterpreter.Classes.Runtime
                     var kv = _runtimeStack.Peek();
                     var token = kv.Key;
                     var errorLine = kv.Value;
-                    ErrorHandler.ThrowError
+                    CodeErrorHandler.ThrowError
                     (errorLine, $"BEGIN {token} must match END {token} or vice versa.");
                 }
             }

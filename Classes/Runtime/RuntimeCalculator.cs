@@ -34,7 +34,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
             string leftErrorText = left is null ? "null" : left.GetType().ToString();
             string rightErrorText = right is null ? "null" : right.GetType().ToString();
 
-            ErrorHandler.ThrowError
+            CodeErrorHandler.ThrowError
             (line, $"Unsupported operand '+' for types {leftErrorText} and {rightErrorText}");
 
             return null;
@@ -64,7 +64,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
             string leftErrorText = left is null ? "null" : left.GetType().ToString();
             string rightErrorText = right is null ? "null" : right.GetType().ToString();
 
-            ErrorHandler.ThrowError
+            CodeErrorHandler.ThrowError
             (line, $"Unsupported operand '-' for types {leftErrorText} and {rightErrorText}");
 
             return null;
@@ -94,7 +94,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
             string leftErrorText = left is null ? "null" : left.GetType().ToString();
             string rightErrorText = right is null ? "null" : right.GetType().ToString();
 
-            ErrorHandler.ThrowError
+            CodeErrorHandler.ThrowError
             (line, $"Unsupported operand '%' for types {leftErrorText} and {rightErrorText}");
 
             return null;

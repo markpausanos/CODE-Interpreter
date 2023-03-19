@@ -1,17 +1,17 @@
 ﻿grammar Code;
 
-program: code_block EOF;
+program: begin_code line* end_code;
 
-line: code_block | if_block | statement;
+line: if_block | statement;
 
-begin_code: 'BEGIN' CODE;
-end_code: 'END' CODE;
-code_block: begin_code line* end_code;
-CODE: 'CODE';
+begin_code: 'BEGIN' CODE NEWLINE;
+end_code: 'END' CODE EOF;
+// code_block: begin_code (line (NEWLINE line)* NEWLINE?)? end_code;
+CODE: 'CODE';   
 
 if_block: 'IF' '(' expression ')' else_block ('ELSE' elseIfBlock)*;
-begin_if: 'BEGIN' IF;
-end_if: 'END' IF;
+begin_if: 'BEGIN' IF NEWLINE;
+end_if: 'END' IF NEWLINE;
 else_block: begin_if line* end_if;
 IF: 'IF';
 
@@ -19,10 +19,10 @@ elseIfBlock: if_block | else_block;
 
 statement: declaration | assignment | function_call;
 
-declaration: DATA_TYPE variable (',' variable)*;
+declaration: DATA_TYPE variable (',' variable)* NEWLINE;
 variable: IDENTIFIER ('=' (expression))?;
-assignment: IDENTIFIER ('=' IDENTIFIER)* '=' expression;
-function_call: IDENTIFIER? ':' expression;
+assignment: IDENTIFIER ('=' IDENTIFIER)* '=' expression NEWLINE;
+function_call: IDENTIFIER ':' expression NEWLINE;
 
 DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
@@ -52,5 +52,6 @@ add_op: '+' | '-';
 compare_op: '>' | '<' | '>=' | '<=' | '==' | '<>';
 bool_op: 'AND' | 'OR';
 
-COMMENT: '#' ~[\r\n]* -> skip;
-WS: [ \t\r\n]+ -> skip;
+COMMENT: '#' ~[\r\n]* NEWLINE -> skip;
+NEWLINE   : '\r'? '\n';
+WS: [ \t]+ -> skip;

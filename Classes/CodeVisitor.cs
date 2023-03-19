@@ -11,7 +11,6 @@ namespace CODEInterpreter.Classes
         RuntimeData _runtimeData;
         RuntimeCalculator _valueCalculator;
         RuntimeFunction _runtimeFunction;
-        private bool _hasExecutedOnce = false;
         private bool _canExecute = false;
         private bool _canDeclare = false;
         public CodeVisitor(CodeLexer codeLexer, int fileLength)
@@ -24,14 +23,14 @@ namespace CODEInterpreter.Classes
         {
             if (_canExecute)
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, $"BEGIN CODE already declared.");
             }
             var begin = context.CODE();
 
             if (begin == null)
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, $"Expected CODE, found none." );
             }
 
@@ -45,24 +44,18 @@ namespace CODEInterpreter.Classes
         {
             var end = context.CODE();
 
-            if (_hasExecutedOnce)
-            {
-                ErrorHandler.ThrowError
-                (context.Start.Line, "Another CODE block found, only one can exist in one file.");
-            }
             if (!_canExecute)
             {
-                ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
+                CodeErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
             }
             if (end == null)
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, $"Expected CODE, found none.");
             }
 
             var endText = end.GetText();
 
-            _hasExecutedOnce = true;
             _canExecute = false;
             _canDeclare = false;
 
@@ -84,16 +77,16 @@ namespace CODEInterpreter.Classes
 
             if (!_canExecute)
             {
-                ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
+                CodeErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
             }
             if (!_canDeclare)
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, "Cannot declare variables after execution.");
             }
             if (variableType == null)
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, "Expected DATA TYPE, found none.");
             }
 
@@ -109,7 +102,7 @@ namespace CODEInterpreter.Classes
                 //}
                 if (variable.IDENTIFIER() == null)
                 {
-                    ErrorHandler.ThrowError
+                    CodeErrorHandler.ThrowError
                     (context.Start.Line, "Expected IDENTIFIER, found none.");
                 }
 
@@ -125,11 +118,11 @@ namespace CODEInterpreter.Classes
         {
             if (!_canExecute)
             {
-                ErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
+                CodeErrorHandler.ThrowError(context.Start.Line, "BEGIN CODE not found.");
             }
             if (context.expression() == null)
             {
-                ErrorHandler.ThrowError(context.Start.Line, "Value not found.");
+                CodeErrorHandler.ThrowError(context.Start.Line, "Value not found.");
             }
 
             var identifiers = context.IDENTIFIER();
@@ -139,7 +132,7 @@ namespace CODEInterpreter.Classes
             {
                 if (identifier == null)
                 {
-                    ErrorHandler.ThrowError(context.Start.Line, "Identifier not found.");
+                    CodeErrorHandler.ThrowError(context.Start.Line, "Identifier not found.");
                 }
                 _runtimeData.AssignVariable(identifier.GetText(), value, context.Start.Line);
             }
@@ -181,7 +174,7 @@ namespace CODEInterpreter.Classes
 
             if (!_runtimeData.CheckVariableExists(variableName))
             {
-                ErrorHandler.ThrowError
+                CodeErrorHandler.ThrowError
                 (context.Start.Line, $"Unexpected token {variableName}. Variable {variableName} is not defined.");
             }
 
@@ -199,7 +192,7 @@ namespace CODEInterpreter.Classes
                 "+" => _valueCalculator.Add(left, right, context.Start.Line),
                 "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
                 "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
-                _ => ErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
+                _ => CodeErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
             };
         }
         public override object? VisitAddExpression([NotNull] CodeParser.AddExpressionContext context)
@@ -214,7 +207,7 @@ namespace CODEInterpreter.Classes
                 "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
                 "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
                 // TODO: Concatenate
-                _ => ErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
+                _ => CodeErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
             };
         }
     }
