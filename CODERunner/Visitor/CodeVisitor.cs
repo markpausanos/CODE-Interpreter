@@ -106,7 +106,7 @@ namespace CODEInterpreter.Classes.Visitor
             }
             if (context.BOOL() != null)
             {
-                return context.BOOL().GetText()[1..^1].Equals("TRUE");
+                return context.BOOL().GetText()[1..^1].ToUpper().Trim().Equals("TRUE");
             }
             if (context.STRING() != null)
             {
