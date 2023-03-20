@@ -69,20 +69,29 @@ namespace CODEInterpreter.Classes.Visitor
                 _runtimeData.AssignVariable(identifier.GetText(), value, context.Start.Line);
             }
 
-            return base.VisitAssignment(context);
+            return null;
         }
         public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
         {
+            _canDeclare = false;
             _runtimeFunction.Display(Visit(context.expression()));
             return null;
         }
         public override object? VisitScan([NotNull] CodeParser.ScanContext context)
         {
+            _canDeclare = false;
             List<string> args = new List<string>();
 
             foreach (var arg in context.IDENTIFIER())
             {
-                args.Add(arg.GetText());
+                if (_runtimeData.CheckVariableExists(arg.GetText()))
+                {
+                    args.Add(arg.GetText());
+                }
+                else
+                {
+                    CodeErrorHandler.ThrowError(context.Start.Line, $"Variable {arg.GetText()} not found.");
+                }
             }
 
             _runtimeFunction.Scan(args, context.Start.Line);
@@ -112,6 +121,10 @@ namespace CODEInterpreter.Classes.Visitor
             }
 
             return null;
+        }
+        public override object? VisitEscapeCharExpression([NotNull] CodeParser.EscapeCharExpressionContext context)
+        {
+            return char.Parse(context.ESCAPE_CHAR().GetText()[1..^1]);
         }
         public override object? VisitIdentifierExpression([NotNull] CodeParser.IdentifierExpressionContext context)
         {
@@ -143,13 +156,12 @@ namespace CODEInterpreter.Classes.Visitor
             var right = Visit(context.expression(1));
             var op = context.multiply_op().GetText();
 
-            //TODO: Add calcs for multiply
             return op switch
             {
-                "+" => _valueCalculator.Add(left, right, context.Start.Line),
-                "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
+                "*" => _valueCalculator.Multiply(left, right, context.Start.Line),
+                "/" => _valueCalculator.Divide(left, right, context.Start.Line),
                 "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
-                _ => CodeErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
+                _ => throw new NotImplementedException()
             };
         }
         public override object? VisitAddExpression([NotNull] CodeParser.AddExpressionContext context)
@@ -162,8 +174,7 @@ namespace CODEInterpreter.Classes.Visitor
             {
                 "+" => _valueCalculator.Add(left, right, context.Start.Line),
                 "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
-                "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
-                _ => CodeErrorHandler.ThrowError(context.Start.Line, $"Unexpected token '{op}'.")
+                _ => throw new NotImplementedException()
             };
         }
         public override object? VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
