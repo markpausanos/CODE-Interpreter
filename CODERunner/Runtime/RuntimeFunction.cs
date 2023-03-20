@@ -13,7 +13,7 @@ namespace CODEInterpreter.Classes.Runtime
         }
         public void Display(object? args)
         {
-            Console.WriteLine(args);
+            Console.Write(args);
         }
         public void Scan(List<string> args, int line)
         {
