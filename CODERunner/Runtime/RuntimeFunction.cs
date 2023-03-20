@@ -10,32 +10,12 @@ namespace CODEInterpreter.Classes.Runtime
         public RuntimeFunction(RuntimeData runtimeData)
         {
             _runtimeData = runtimeData;
-            AvailableFunctions = new List<string>() { "DISPLAY", "SCAN" };
-        }
-        public bool CallMethod(string identifier, List<object?> argsParams, object? argsSingle, int line)
-        {
-            if (!AvailableFunctions.Contains(identifier))
-            {
-                return false;
-            }
-
-            if (identifier.Equals("DISPLAY"))
-            {
-                Display(argsSingle);
-            }
-
-            if (identifier.Equals("SCAN"))
-            {
-                Scan(argsParams, line);
-            }
-
-            return true;
         }
         public void Display(object? args)
         {
-            Console.Write(args);
+            Console.WriteLine(args);
         }
-        public void Scan(List<object?> args, int line)
+        public void Scan(List<string> args, int line)
         {
             string input = Console.ReadLine();
             string[] separatedInputs = input.Split(",");
@@ -46,7 +26,7 @@ namespace CODEInterpreter.Classes.Runtime
             }
             for (int i = 0; i < args.Count(); i++)
             {
-                _runtimeData.AssignVariable(args[i].ToString(), separatedInputs[i], line);
+                _runtimeData.AssignVariable(args[i], separatedInputs[i], line);
             }
         }
     }

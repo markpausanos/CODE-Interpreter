@@ -27,6 +27,36 @@ namespace CODEInterpreter.Classes.ValidKeywords
                 return "NULL";
             }
         }
+        public bool? Not(object? expression, int line)
+        {
+            if (expression is object && expression is bool)
+            {
+                return !((bool)expression);
+            }
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand 'NOT' for type {GetTypeObject(expression)}");
+
+            return null;
+        }
+        public object? Unary(object? expression, string symbol, int line)
+        {
+            Console.WriteLine(expression);
+            if (expression is int)
+            {
+                return int.Parse(symbol + expression);
+            }
+
+            if (expression is float)
+            {
+                return float.Parse(symbol + expression);
+            }
+
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand 'UNARY' for type {GetTypeObject(expression)}");
+
+            return null;
+        }
         private void ThrowErrorInCalculator(object? left, object? right, string symbol, int line)
         {
             string leftType = GetTypeObject(left);

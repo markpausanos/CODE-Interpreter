@@ -71,23 +71,21 @@ namespace CODEInterpreter.Classes.Visitor
 
             return base.VisitAssignment(context);
         }
-        public override object? VisitFunction_call([NotNull] CodeParser.Function_callContext context)
+        public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
         {
-            _canDeclare = false;
+            _runtimeFunction.Display(Visit(context.expression()));
+            return null;
+        }
+        public override object? VisitScan([NotNull] CodeParser.ScanContext context)
+        {
+            List<string> args = new List<string>();
 
-            List<object?> argsIdentifiers = new List<object?>();
-            object? argsExpression;
-
-            var arg = context.arguments();
-            
-            foreach (var identifier in arg.IDENTIFIER())
+            foreach (var arg in context.IDENTIFIER())
             {
-                argsIdentifiers.Add(identifier);
+                args.Add(arg.GetText());
             }
-            argsExpression = arg.expression() == null ? null : Visit(arg.expression());
 
-            _runtimeFunction.CallMethod(context.IDENTIFIER().GetText(), argsIdentifiers, argsExpression, context.Start.Line);
-            
+            _runtimeFunction.Scan(args, context.Start.Line);
             return null;
         }
         public override object? VisitConstant([NotNull] CodeParser.ConstantContext context)
@@ -125,11 +123,19 @@ namespace CODEInterpreter.Classes.Visitor
                 (context.Start.Line, $"Unexpected token {variableName}. Variable {variableName} is not defined.");
             }
 
-            return _runtimeData.GetValue(variableName);
+            return _runtimeData.GetValue(variableName) ?? "NULL";
         }
         public override object? VisitParenthesizedExpression([NotNull] CodeParser.ParenthesizedExpressionContext context)
         {
             return Visit(context.expression());
+        }
+        public override object? VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
+        {
+            return _valueCalculator.Not(Visit(context.expression()), context.Start.Line);
+        }
+        public override object? VisitUnaryExpression([NotNull] CodeParser.UnaryExpressionContext context)
+        {
+            return _valueCalculator.Unary(Visit(context.expression()), context.unary().GetText(), context.Start.Line);
         }
         public override object? VisitMultiplyExpression([NotNull] CodeParser.MultiplyExpressionContext context)
         {
@@ -166,6 +172,10 @@ namespace CODEInterpreter.Classes.Visitor
             var right = Visit(context.expression(1));
 
             return _valueCalculator.Concatenation(left, right, context.Start.Line);
+        }
+        public override object? VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
+        {
+            return "\n";
         }
     }
 }
