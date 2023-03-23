@@ -42,6 +42,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
         public object? Unary(object? expression, string symbol, int line)
         {
             int multiplier = symbol.Equals("+") ? 1 : -1;
+
             if (expression is int && expression is object)
             {
                 expression = int.Parse(expression.ToString());
@@ -334,16 +335,18 @@ namespace CODEInterpreter.Classes.ValidKeywords
         }
         public object? Concatenation(object? left, object? right, int line)
         {
-            if (left is bool)
-            {
-                left = left.ToString().ToUpper();
-            }
-            if (right is bool)
-            {
-                right = right.ToString().ToUpper();
-            }
             if (left is object && right is object)
             {
+                if (left is bool)
+                {
+                    left = left.ToString()!.ToUpper();
+                }
+
+                if (right is bool)
+                {
+                    right = right.ToString()!.ToUpper();
+                }
+
                 return left.ToString() + right.ToString();
             }
 

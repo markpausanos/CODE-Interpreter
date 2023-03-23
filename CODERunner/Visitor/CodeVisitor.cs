@@ -213,6 +213,20 @@ namespace CODEInterpreter.Classes.Visitor
                 _ => throw new NotImplementedException()
             };
         }
+        public override object? VisitCompareExpression([NotNull] CodeParser.CompareExpressionContext context)
+        {
+            var left = Visit(context.expression(0));
+            var right = Visit(context.expression(1));
+            var op = context.compare_op().GetText();
+
+            return op switch
+            {
+                ">" => _runtimeCalculator.GreaterThan(left, right, context.Start.Line),
+                "<" => _runtimeCalculator.LessThan(left, right, context.Start.Line),
+                ">=" => _runtimeCalculator.GreaterThanOrEqualTo(left, right, context.Start.Line),
+                _ => throw new NotImplementedException()
+            };
+        }
         public override object? VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
         {
             var left = Visit(context.expression(0));
@@ -223,20 +237,6 @@ namespace CODEInterpreter.Classes.Visitor
         public override object? VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
         {
             return "\n";
-        }
-        public override object? VisitCompareExpression([NotNull] CodeParser.CompareExpressionContext context)
-        {
-            var left = Visit(context.expression(0));
-            var right = Visit(context.expression(1));
-            var op = context.compare_op().GetText();
-
-            return op switch
-            {
-                ">" => _valueCalculator.GreaterThan(left, right, context.Start.Line),
-                "<" => _valueCalculator.LessThan(left, right, context.Start.Line),
-                ">=" => _valueCalculator.GreaterThanOrEqualTo(left, right, context.Start.Line),
-                _ => throw new NotImplementedException()
-            };
         }
     }
 }
