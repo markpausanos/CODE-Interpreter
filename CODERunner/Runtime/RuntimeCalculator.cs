@@ -196,9 +196,141 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
-        public bool GreaterThan(object? left, object? right, int line)
+        public bool? GreaterThan(object? left, object? right, int line)
         {
-            throw new NotImplementedException();
+            if (left is int l && right is int r)
+            {
+                if(l > r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf > rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt > rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat > rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, ">", line);
+
+            return null;
+        }
+        public bool? LessThan(object? left, object? right, int line)
+        {
+            if (left is int l && right is int r)
+            {
+                if (l < r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf < rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt < rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat < rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, "<", line);
+
+            return null;
+        }
+        public bool? GreaterThanOrEqualTo(object? left, object? right, int line)
+        {
+            if (left is int l && right is int r)
+            {
+                if (l >= r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf >= rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt >= rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat >= rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, ">=", line);
+
+            return null;
+        }
+        public bool? And(object? left, object? right, int line)
+        {
+            if (left is bool l && right is bool r)
+            {
+                return l && r;
+            }
+
+            ThrowErrorInCalculator(left, right, "AND", line);
+            return null;
         }
         public object? Concatenation(object? left, object? right, int line)
         {
