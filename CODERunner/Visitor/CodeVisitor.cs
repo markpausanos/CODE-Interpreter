@@ -73,7 +73,12 @@ namespace CODEInterpreter.Classes.Visitor
         {
             object? result = Visit(context.expression());
 
-            if (result is object && (bool)result == true)
+            if (result is not object || result is not bool)
+            {
+                CodeErrorHandler.ThrowError(context.Start.Line, $"Cannot use non-BOOL expression \"{result}\" as condition.");
+            }
+
+            if ((bool)result == true)
             {
                 Visit(context.else_block());
                 return true;
@@ -93,7 +98,6 @@ namespace CODEInterpreter.Classes.Visitor
                 if (context.else_block() is object)
                 {
                     Visit(context.else_block());
-                    return false;
                 }
 
                 return false;
@@ -103,7 +107,12 @@ namespace CODEInterpreter.Classes.Visitor
         {
             object? result = Visit(context.expression());
 
-            if (result is object && (bool)result == true)
+            if (result is not object || result is not bool)
+            {
+                CodeErrorHandler.ThrowError(context.Start.Line, $"Cannot use non-BOOL expression \"{result}\" as condition.");
+            }
+
+            if ((bool)result == true)
             {
                 Visit(context.if_code_block());
                 return true;
@@ -113,13 +122,22 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitWhile_block([NotNull] CodeParser.While_blockContext context)
         {
-            while (Visit(context.expression()) is object l && (bool)l == true)
+            object? result = Visit(context.expression());
+
+            if (result is not object || result is not bool)
+            {
+                CodeErrorHandler.ThrowError(context.Start.Line, $"Cannot use non-BOOL expression \"{result}\" as condition.");
+            }
+
+            while ((bool)result == true)
             {
                 if (Visit(context.while_code_block()) is object m && (bool)m == false)
                 {
-                    break;
+                    return false;
                 }
+                result = Visit(context.expression());
             }
+
             return null;
         }
         public override object? VisitWhile_code_block([NotNull] CodeParser.While_code_blockContext context)
