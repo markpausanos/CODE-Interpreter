@@ -1,41 +1,61 @@
 ﻿grammar Code;
 
-program: begin_code line* end_code;
+program: begin_code declaration* line* end_code;
 
-line: if_block | statement;
+line
+    : if_block 
+    | statement
+    ;
 
-begin_code: NEWLINE? 'BEGIN' CODE;
-end_code: NEWLINE 'END' CODE EOF;
+begin_code: NEWLINE? BEGIN CODE;
+end_code: NEWLINE END CODE EOF;
+BEGIN: 'BEGIN';
+END: 'END';
 CODE: 'CODE';   
 
-if_block: 'IF' '(' expression ')' else_block ('ELSE' elseIfBlock)*;
-begin_if: NEWLINE 'BEGIN' IF;
-end_if: NEWLINE 'END' IF;
-else_block: begin_if line* end_if;
-IF: 'IF';
-
-elseIfBlock: if_block | else_block;
-
-statement: declaration | assignment | function_call;
-
-declaration: NEWLINE IDENTIFIER variable (',' variable)*;
+declaration: NEWLINE data_type variable (',' variable)*;
 variable: IDENTIFIER ('=' (expression))?;
+data_type: INT_TEXT | CHAR_TEXT | BOOL_TEXT | FLOAT_TEXT;
+
+statement
+    : assignment
+    | function_call 
+    | if_block 
+    | while_block
+    ;
+
 assignment: NEWLINE IDENTIFIER ('=' IDENTIFIER)* '=' expression;
+
 function_call: NEWLINE (display | scan);
 arguments : expression (',' expression)*; 
 
 display: 'DISPLAY' ':' expression;
 scan: 'SCAN' ':' IDENTIFIER (',' IDENTIFIER)*;
 
-IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
-INT: [0-9]+;    
-CHAR: '\'' ~ '\'' '\'';
-ESCAPE_CHAR: '[' .? ']';
-STRING: '"' (~ '"')* '"';
-BOOL: ('"' 'TRUE' '"') | ('"' 'FALSE' '"');
-FLOAT: [0-9]+ ('.' [0-9]+)?;
+if_block: NEWLINE IF '(' expression ')' if_code_block else_if_block* else_block?;
+else_if_block: NEWLINE ELSE IF '(' expression ')' if_code_block;
+else_block: NEWLINE ELSE if_code_block;
+begin_if: NEWLINE BEGIN IF;
+end_if: NEWLINE END IF;
+if_code_block: begin_if line* end_if;
+IF: 'IF';
+ELSE: 'ELSE';
 
-constant: INT | CHAR | BOOL | FLOAT | STRING;
+while_block: NEWLINE WHILE '(' expression ')' while_code_block;
+begin_while: NEWLINE BEGIN WHILE;
+end_while: NEWLINE END WHILE;
+break: NEWLINE BREAK;
+continue: NEWLINE CONTINUE;
+while_line
+    : line
+    | break
+    | continue
+    ;
+while_code_block: begin_while while_line* end_while;
+WHILE: 'WHILE';
+BREAK: 'BREAK';
+CONTINUE: 'CONTINUE';
+
 expression
     : constant                                      #constantExpression
     | ESCAPE_CHAR                                   #escapeCharExpression
@@ -50,6 +70,20 @@ expression
     | expression concat_op expression               #concatExpression
     | newline_op                                    #newlineExpression
     ;
+
+INT_TEXT: 'INT';
+CHAR_TEXT: 'CHAR';
+BOOL_TEXT: 'BOOL';
+FLOAT_TEXT: 'FLOAT';
+IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
+INT: [0-9]+;    
+CHAR: '\'' ~ '\'' '\'';
+ESCAPE_CHAR: '[' .? ']';
+BOOL: ('"' 'TRUE' '"') | ('"' 'FALSE' '"');
+STRING: '"' (~ '"')* '"';
+FLOAT: [0-9]+ ('.' [0-9]+)?;
+
+constant: INT | CHAR | BOOL | FLOAT | STRING;
 
 unary: '+' | '-';
 multiply_op: '*' | '/' | '%';

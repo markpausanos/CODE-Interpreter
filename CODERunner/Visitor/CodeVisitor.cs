@@ -9,40 +9,17 @@ namespace CODEInterpreter.Classes.Visitor
     public class CodeVisitor : CodeBaseVisitor<object?>
     {
         RuntimeData _runtimeData;
-        RuntimeCalculator _valueCalculator;
+        RuntimeCalculator _runtimeCalculator;
         RuntimeFunction _runtimeFunction;
-        private bool _canDeclare = false;
         public CodeVisitor()
         {
             _runtimeData = new RuntimeData();
             _runtimeFunction = new RuntimeFunction(_runtimeData);
-            _valueCalculator = new RuntimeCalculator();
+            _runtimeCalculator = new RuntimeCalculator();
         }
-        public override object? VisitBegin_code([NotNull] CodeParser.Begin_codeContext context)
-        {
-            _canDeclare = true;
-
-            return null;
-        }
-        public override object? VisitIf_block([NotNull] CodeParser.If_blockContext context)
-        {
-            return base.VisitIf_block(context);
-        }
-
-        public override object? VisitElse_block([NotNull] CodeParser.Else_blockContext context)
-        {
-            return base.VisitElse_block(context);
-        }
-
         public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
         {
-            var variableType = context.IDENTIFIER();
-
-            if (!_canDeclare)
-            {
-                CodeErrorHandler.ThrowError
-                (context.Start.Line, "Cannot declare variables after other operations.");
-            }
+            var variableType = context.data_type();
 
             var variableDataType = variableType.GetText();
             var variables = context.variable();
@@ -59,8 +36,6 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
         {
-            _canDeclare = false;
-
             var identifiers = context.IDENTIFIER();
             var value = Visit(context.expression());
 
@@ -73,13 +48,11 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
         {
-            _canDeclare = false;
             _runtimeFunction.Display(Visit(context.expression()));
             return null;
         }
         public override object? VisitScan([NotNull] CodeParser.ScanContext context)
         {
-            _canDeclare = false;
             List<string> args = new List<string>();
 
             foreach (var arg in context.IDENTIFIER())
@@ -95,6 +68,69 @@ namespace CODEInterpreter.Classes.Visitor
             }
 
             _runtimeFunction.Scan(args, context.Start.Line);
+            return null;
+        }
+        public override object? VisitIf_block([NotNull] CodeParser.If_blockContext context)
+        {
+            object? result = Visit(context.expression());
+            if (result is object && (bool)result == true)
+            {
+                Visit(context.else_block());
+                return true;
+            }
+            else
+            {
+                var elseifBlocks = context.else_if_block();
+                foreach (var elseIfBlock in elseifBlocks)
+                {
+                    if ((bool)Visit(elseIfBlock)! == true)
+                    {
+                        return false;
+                    }
+                }
+                if (context.else_block() is object)
+                {
+                    Visit(context.else_block());
+                    return false;
+                }
+                return false;
+            }
+        }
+        public override object? VisitElse_if_block([NotNull] CodeParser.Else_if_blockContext context)
+        {
+            object? result = Visit(context.expression());
+            if (result is object && (bool)result == true)
+            {
+                Visit(context.if_code_block());
+                return true;
+            }
+            return false;
+        }
+        public override object? VisitWhile_block([NotNull] CodeParser.While_blockContext context)
+        {
+            while (Visit(context.expression()) is object l && (bool)l == true)
+            {
+                if (Visit(context.while_code_block()) is object m && (bool)m == false)
+                {
+                    break;
+                }
+            }
+            return null;
+        }
+        public override object? VisitWhile_code_block([NotNull] CodeParser.While_code_blockContext context)
+        {
+            foreach (var whileLine in context.while_line())
+            {
+                if (whileLine.@break() is object)
+                {
+                    return false;
+                }
+                if (whileLine.@continue() is object)
+                {
+                    return true;
+                }
+                Visit(whileLine);
+            }
             return null;
         }
         public override object? VisitConstant([NotNull] CodeParser.ConstantContext context)
@@ -144,11 +180,11 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
         {
-            return _valueCalculator.Not(Visit(context.expression()), context.Start.Line);
+            return _runtimeCalculator.Not(Visit(context.expression()), context.Start.Line);
         }
         public override object? VisitUnaryExpression([NotNull] CodeParser.UnaryExpressionContext context)
         {
-            return _valueCalculator.Unary(Visit(context.expression()), context.unary().GetText(), context.Start.Line);
+            return _runtimeCalculator.Unary(Visit(context.expression()), context.unary().GetText(), context.Start.Line);
         }
         public override object? VisitMultiplyExpression([NotNull] CodeParser.MultiplyExpressionContext context)
         {
@@ -158,9 +194,9 @@ namespace CODEInterpreter.Classes.Visitor
 
             return op switch
             {
-                "*" => _valueCalculator.Multiply(left, right, context.Start.Line),
-                "/" => _valueCalculator.Divide(left, right, context.Start.Line),
-                "%" => _valueCalculator.Modulo(left, right, context.Start.Line),
+                "*" => _runtimeCalculator.Multiply(left, right, context.Start.Line),
+                "/" => _runtimeCalculator.Divide(left, right, context.Start.Line),
+                "%" => _runtimeCalculator.Modulo(left, right, context.Start.Line),
                 _ => throw new NotImplementedException()
             };
         }
@@ -172,8 +208,8 @@ namespace CODEInterpreter.Classes.Visitor
 
             return op switch
             {
-                "+" => _valueCalculator.Add(left, right, context.Start.Line),
-                "-" => _valueCalculator.Subtract(left, right, context.Start.Line),
+                "+" => _runtimeCalculator.Add(left, right, context.Start.Line),
+                "-" => _runtimeCalculator.Subtract(left, right, context.Start.Line),
                 _ => throw new NotImplementedException()
             };
         }
@@ -182,7 +218,7 @@ namespace CODEInterpreter.Classes.Visitor
             var left = Visit(context.expression(0));
             var right = Visit(context.expression(1));
 
-            return _valueCalculator.Concatenation(left, right, context.Start.Line);
+            return _runtimeCalculator.Concatenation(left, right, context.Start.Line);
         }
         public override object? VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
         {
