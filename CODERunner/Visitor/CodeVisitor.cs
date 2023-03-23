@@ -20,7 +20,6 @@ namespace CODEInterpreter.Classes.Visitor
         public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
         {
             var variableType = context.data_type();
-
             var variableDataType = variableType.GetText();
             var variables = context.variable();
 
@@ -73,6 +72,7 @@ namespace CODEInterpreter.Classes.Visitor
         public override object? VisitIf_block([NotNull] CodeParser.If_blockContext context)
         {
             object? result = Visit(context.expression());
+
             if (result is object && (bool)result == true)
             {
                 Visit(context.else_block());
@@ -81,6 +81,7 @@ namespace CODEInterpreter.Classes.Visitor
             else
             {
                 var elseifBlocks = context.else_if_block();
+
                 foreach (var elseIfBlock in elseifBlocks)
                 {
                     if ((bool)Visit(elseIfBlock)! == true)
@@ -88,22 +89,26 @@ namespace CODEInterpreter.Classes.Visitor
                         return false;
                     }
                 }
+
                 if (context.else_block() is object)
                 {
                     Visit(context.else_block());
                     return false;
                 }
+
                 return false;
             }
         }
         public override object? VisitElse_if_block([NotNull] CodeParser.Else_if_blockContext context)
         {
             object? result = Visit(context.expression());
+
             if (result is object && (bool)result == true)
             {
                 Visit(context.if_code_block());
                 return true;
             }
+
             return false;
         }
         public override object? VisitWhile_block([NotNull] CodeParser.While_blockContext context)
@@ -139,18 +144,22 @@ namespace CODEInterpreter.Classes.Visitor
             {
                 return int.Parse(context.INT().GetText());
             }
+
             if (context.CHAR() != null)
             {
                 return char.Parse(context.CHAR().GetText()[1..^1]);
             }
+
             if (context.FLOAT() != null)
             {
                 return float.Parse(context.FLOAT().GetText());
             }
+
             if (context.BOOL() != null)
             {
                 return context.BOOL().GetText()[1..^1].ToUpper().Trim().Equals("TRUE");
             }
+
             if (context.STRING() != null)
             {
                 return context.STRING().GetText()[1..^1];
