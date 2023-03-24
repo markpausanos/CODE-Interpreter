@@ -251,8 +251,11 @@ namespace CODEInterpreter.Classes.Visitor
                 ">" => _runtimeCalculator.GreaterThan(left, right, context.Start.Line),
                 "<" => _runtimeCalculator.LessThan(left, right, context.Start.Line),
                 ">=" => _runtimeCalculator.GreaterThanOrEqualTo(left, right, context.Start.Line),
+                "<=" => _runtimeCalculator.LessThanOrEqualTo(left, right, context.Start.Line),
+                "==" => _runtimeCalculator.Equal(left, right, context.Start.Line),
+                "<>" => _runtimeCalculator.NotEqual(left, right, context.Start.Line),
                 _ => throw new NotImplementedException()
-            };
+            }; ;
         }
         public override object? VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
         {
