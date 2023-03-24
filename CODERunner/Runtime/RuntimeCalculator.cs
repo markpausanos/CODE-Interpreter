@@ -323,6 +323,136 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
+
+        public bool? LessThanOrEqualTo(object? left, object? right, int line)
+        {
+            if (left is int l && right is int r)
+            {
+                if (l <= r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf <= rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt <= rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat <= rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, "<=", line);
+
+            return null;
+        }
+
+        public bool? Equal(object? left, object? right, int line)
+        {
+            if (left is int l && right is int r)
+            {
+                if (l == r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf == rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt == rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat == rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, "==", line);
+
+            return null;
+        }
+
+        public bool? NotEqual(object? left, object? right, int line)
+        {
+            if (left is int l && right is int r)
+            {
+                if (l != r)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lf && right is float rf)
+            {
+                if (lf != rf)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is int lInt && right is int rFloat)
+            {
+                if (lInt != rFloat)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (left is float lFloat && right is int rInt)
+            {
+                if (lFloat != rInt)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            ThrowErrorInCalculator(left, right, "<>", line);
+
+            return null;
+        }
+
         public bool? And(object? left, object? right, int line)
         {
             if (left is bool l && right is bool r)
@@ -333,6 +463,18 @@ namespace CODEInterpreter.Classes.ValidKeywords
             ThrowErrorInCalculator(left, right, "AND", line);
             return null;
         }
+
+        public bool? Or(object? left, object? right, int line)
+        {
+            if (left is bool l && right is bool r)
+            {
+                return l || r;
+            }
+
+            ThrowErrorInCalculator(left, right, "OR", line);
+            return null;
+        }
+
         public object? Concatenation(object? left, object? right, int line)
         {
             if (left is object && right is object)
