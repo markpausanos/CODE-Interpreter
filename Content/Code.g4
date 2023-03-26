@@ -2,9 +2,16 @@
 
 program: begin_code declaration* line* end_code;
 
+declaration: NEWLINE data_type variable (',' variable)*;
+variable: IDENTIFIER ('=' (expression))?;
+data_type: INT_TEXT | CHAR_TEXT | BOOL_TEXT | FLOAT_TEXT;
+
 line
-    : if_block 
-    | statement
+    : assignment
+    | function_call 
+    | if_block 
+    | while_block
+    | for_block
     ;
 
 begin_code: NEWLINE? BEGIN CODE;
@@ -12,17 +19,6 @@ end_code: NEWLINE END CODE EOF;
 BEGIN: 'BEGIN';
 END: 'END';
 CODE: 'CODE';   
-
-declaration: NEWLINE data_type variable (',' variable)*;
-variable: IDENTIFIER ('=' (expression))?;
-data_type: INT_TEXT | CHAR_TEXT | BOOL_TEXT | FLOAT_TEXT;
-
-statement
-    : assignment
-    | function_call 
-    | if_block 
-    | while_block
-    ;
 
 assignment: NEWLINE IDENTIFIER ('=' IDENTIFIER)* '=' expression;
 
@@ -37,24 +33,33 @@ else_if_block: NEWLINE ELSE IF '(' expression ')' if_code_block;
 else_block: NEWLINE ELSE if_code_block;
 begin_if: NEWLINE BEGIN IF;
 end_if: NEWLINE END IF;
-if_code_block: begin_if line* end_if;
+if_line
+    : line
+    ;
+if_code_block: begin_if if_line* end_if;
 IF: 'IF';
 ELSE: 'ELSE';
 
 while_block: NEWLINE WHILE '(' expression ')' while_code_block;
 begin_while: NEWLINE BEGIN WHILE;
 end_while: NEWLINE END WHILE;
-break: NEWLINE BREAK;
-continue: NEWLINE CONTINUE;
 while_line
     : line
-    | break
-    | continue
     ;
 while_code_block: begin_while while_line* end_while;
 WHILE: 'WHILE';
-BREAK: 'BREAK';
-CONTINUE: 'CONTINUE';
+
+for_block: NEWLINE FOR '(' for_initialization? ',' for_condition ',' for_updation? ')' for_code_block;
+for_initialization: variable;
+for_condition: expression;
+for_updation: variable;
+begin_for: NEWLINE BEGIN FOR;
+end_for: NEWLINE END FOR;
+for_line
+    : line
+    ;
+for_code_block: begin_for for_line* end_for;
+FOR: 'FOR';
 
 expression
     : constant                                      #constantExpression
@@ -93,6 +98,7 @@ bool_op: 'AND' | 'OR';
 concat_op: '&';
 newline_op: '$';
 
+UNSUPPORTED_CHARS: '”';
 COMMENT: NEWLINE? '#' ~[\r?\n]*-> channel(HIDDEN);
 NEWLINE: ('\r'? '\n')+;
 WS: [ \t]+ -> skip;

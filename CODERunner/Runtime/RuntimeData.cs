@@ -6,42 +6,13 @@ namespace CODEInterpreter.Classes.Runtime
 {
     public class RuntimeData
     {
-        private Stack<KeyValuePair<string, int>> _runtimeStack;
         private Dictionary<string, Variable> _runtimeVariables;
         private ValidTokensV1 _validTokensV1;
-
+        
         public RuntimeData()
         {
-            _runtimeStack = new Stack<KeyValuePair<string, int>>();
             _runtimeVariables = new Dictionary<string, Variable>();
             _validTokensV1 = new ValidTokensV1();
-        }
-        public void PushToken(string token, int line)
-        {
-            if (!_validTokensV1.ValidBeginnables.Contains(token))
-            {
-                CodeErrorHandler.ThrowError
-                (line, $"Invalid token BEGIN \"{token}\".");
-            }
-
-            _runtimeStack.Push(new KeyValuePair<string, int>(token, line));
-        }
-        public void PopToken(string token, int line)
-        {
-            if (!_validTokensV1.ValidBeginnables.Contains(token))
-            {
-                CodeErrorHandler.ThrowError
-                (line, $"Invalid token END \"{token}\".");
-            }
-            if (_runtimeStack.Count == 0  || 
-                _runtimeStack.Peek().Key == null ||
-                !_runtimeStack.Peek().Key!.Equals(token)
-                )
-            {
-                CodeErrorHandler.ThrowError(line, $"BEGIN {token} not found.");
-            }
-
-            _runtimeStack.Pop();
         }
         public void AddVariable(string dataType, string name, object? value, int line)
         {
@@ -75,9 +46,15 @@ namespace CODEInterpreter.Classes.Runtime
 
             _runtimeVariables[identifier].AssignVariable(value);
         }
-        public object? GetValue(string identifier)
+        public object? GetValue(string variableName, int line)
         {
-            return _runtimeVariables[identifier].Value;
+            if (!CheckVariableExists(variableName))
+            {
+                CodeErrorHandler.ThrowError
+                (line, $"Unexpected token {variableName}. Variable {variableName} is not defined.");
+            }
+
+            return _runtimeVariables[variableName].Value;
         }
     }
 }

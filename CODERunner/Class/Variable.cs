@@ -1,11 +1,4 @@
-﻿using Antlr4.Runtime.Atn;
-using CODEInterpreter.Classes.ErrorHandling;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CODEInterpreter.Classes.ErrorHandling;
 
 namespace CODEInterpreter.CODERunner.Class
 {
@@ -29,19 +22,23 @@ namespace CODEInterpreter.CODERunner.Class
 
             try
             {
+                var StringValue = value.ToString()!;
+
                 switch (DataType)
                 {
                     case "INT":
-                        Value = int.Parse(value.ToString()!);
+                        
+                        Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
-                        Value = float.Parse(value.ToString()!);
+                        Value = float.Parse(StringValue);
                         break;
                     case "CHAR":
-                        Value = char.Parse(value.ToString()!);
+                        Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(value.ToString()!);
+                        Value = bool.Parse(StringValue);
+                        Value = Value.ToString()!.ToUpper();
                         break;
                 }
             }
@@ -60,19 +57,23 @@ namespace CODEInterpreter.CODERunner.Class
 
             try
             {
+                var StringValue = value.ToString()!;
+
                 switch (DataType)
                 {
                     case "INT":
-                        Value = int.Parse(value.ToString()!);
+
+                        Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
-                        Value = float.Parse(value.ToString()!);
+                        Value = float.Parse(StringValue);
                         break;
                     case "CHAR":
-                        Value = char.Parse(value.ToString()!);
+                        Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(value.ToString()!);
+                        Value = bool.Parse(StringValue);
+                        Value = Value.ToString()!.ToUpper();
                         break;
                 }
             }
