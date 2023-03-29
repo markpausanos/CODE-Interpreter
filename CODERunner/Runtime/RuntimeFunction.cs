@@ -1,4 +1,5 @@
 ﻿using CODEInterpreter.Classes.ErrorHandling;
+using System.Text.RegularExpressions;
 
 namespace CODEInterpreter.Classes.Runtime
 {
@@ -13,6 +14,10 @@ namespace CODEInterpreter.Classes.Runtime
         }
         public void Display(object? args)
         {
+            if (args is bool)
+            {
+                args = args.ToString().ToUpper();
+            }
             Console.Write(args);
         }
         public void Scan(List<string> args, int line)

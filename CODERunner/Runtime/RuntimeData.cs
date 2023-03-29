@@ -8,7 +8,6 @@ namespace CODEInterpreter.Classes.Runtime
     {
         private Dictionary<string, Variable> _runtimeVariables;
         private ValidTokensV1 _validTokensV1;
-        
         public RuntimeData()
         {
             _runtimeVariables = new Dictionary<string, Variable>();

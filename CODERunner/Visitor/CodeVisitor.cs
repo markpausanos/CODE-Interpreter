@@ -19,8 +19,7 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
         {
-            var variableType = context.data_type();
-            var variableDataType = variableType.GetText();
+            var variableDataType = context.data_type().GetText();
             var variables = context.variable();
 
             foreach (var variable in variables)

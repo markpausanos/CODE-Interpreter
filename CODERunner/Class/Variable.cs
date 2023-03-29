@@ -20,14 +20,13 @@ namespace CODEInterpreter.CODERunner.Class
                 return;
             }
 
+            var StringValue = value is bool ? value.ToString().ToUpper() : value.ToString();
+
             try
             {
-                var StringValue = value.ToString()!;
-
                 switch (DataType)
                 {
                     case "INT":
-                        
                         Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
@@ -37,14 +36,13 @@ namespace CODEInterpreter.CODERunner.Class
                         Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(StringValue);
                         Value = Value.ToString()!.ToUpper();
                         break;
                 }
             }
             catch (Exception ex)
             {
-                CodeErrorHandler.ThrowError(line, $"Cannot convert {value} to {dataType}");
+                CodeErrorHandler.ThrowError(line, $"Cannot convert {StringValue} to {dataType}");
             }
         }
         public void AssignVariable(object? value)
@@ -54,15 +52,13 @@ namespace CODEInterpreter.CODERunner.Class
                 Value = null;
                 return;
             }
-
+            
+            var StringValue = value is bool ? value.ToString().ToUpper() : value.ToString();
             try
             {
-                var StringValue = value.ToString()!;
-
                 switch (DataType)
                 {
                     case "INT":
-
                         Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
@@ -72,14 +68,13 @@ namespace CODEInterpreter.CODERunner.Class
                         Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(StringValue);
                         Value = Value.ToString()!.ToUpper();
                         break;
                 }
             }
             catch (Exception ex)
             {
-                CodeErrorHandler.ThrowError(Line, $"Cannot convert '{value}' to {DataType}");
+                CodeErrorHandler.ThrowError(Line, $"Cannot convert '{StringValue}' to {DataType}");
             }
         }
     }

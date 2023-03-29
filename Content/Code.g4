@@ -3,7 +3,7 @@
 program: begin_code declaration* line* end_code;
 
 declaration: NEWLINE data_type variable (',' variable)*;
-variable: IDENTIFIER ('=' (expression))?;
+variable: IDENTIFIER ('=' (expression))?; 
 data_type: INT_TEXT | CHAR_TEXT | BOOL_TEXT | FLOAT_TEXT;
 
 line
@@ -23,7 +23,6 @@ CODE: 'CODE';
 assignment: NEWLINE IDENTIFIER ('=' IDENTIFIER)* '=' expression;
 
 function_call: NEWLINE (display | scan);
-arguments : expression (',' expression)*; 
 
 display: 'DISPLAY' ':' expression;
 scan: 'SCAN' ':' IDENTIFIER (',' IDENTIFIER)*;
