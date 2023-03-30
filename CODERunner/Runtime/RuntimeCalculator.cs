@@ -44,7 +44,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             if (expression is float && expression is object)
             {
-                expression = float.Parse(expression.ToString());
+                expression = float.Parse(expression.ToString()!);
 
                 return multiplier * (float)expression;
             }

@@ -36,7 +36,6 @@ namespace CODEInterpreter.Classes.Visitor
         {
             var identifiers = context.IDENTIFIER();
             var value = Visit(context.expression());
-
             foreach (var identifier in identifiers)
             {
                 _runtimeData.AssignVariable(identifier.GetText(), value, context.Start.Line);

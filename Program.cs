@@ -3,26 +3,17 @@ using CODEInterpreter.Classes.ErrorHandling;
 using CODEInterpreter.Classes.Visitor;
 using CODEInterpreter.Content;
 
-string baseDirectory;
-
-while (true)
-{
-    Console.Write("Enter base directory: ");
-    baseDirectory = Console.ReadLine();
-    if (baseDirectory is not null && baseDirectory.Length != 0)
-    {
-        break;
-    }
-}
-
 while (true)
 {
     try
     {
-        Console.Write("Enter file name: ");
-        var fileName = Console.ReadLine();
+
+        var baseDirectory = "C:\\Sample\\";
+        var fileName = "hello.txt";
         var testFileName = baseDirectory + fileName;
         var fileContents = File.ReadAllText(testFileName.TrimEnd());
+
+        File.AppendAllText("C:\\Sample\\Copied\\test.txt", fileContents + "\n\n");
         var fileLines = File.ReadAllLines(testFileName).Length;
         var inputStream = new AntlrInputStream(fileContents);
 
