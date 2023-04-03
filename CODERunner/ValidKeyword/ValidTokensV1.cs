@@ -19,7 +19,11 @@
             "DISPLAY",
             "SCAN"
         };
-        private List<string> _validReservedKeywords = new List<string>();
+        private List<string> _validReservedKeywords = new List<string>()
+        { 
+            "BEGIN",
+            "END"
+        };
     
         public List<string> ValidDataTypes
         {

@@ -19,8 +19,7 @@ namespace CODEInterpreter.Classes.Visitor
         }
         public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
         {
-            var variableType = context.data_type();
-            var variableDataType = variableType.GetText();
+            var variableDataType = context.data_type().GetText();
             var variables = context.variable();
 
             foreach (var variable in variables)
@@ -37,7 +36,6 @@ namespace CODEInterpreter.Classes.Visitor
         {
             var identifiers = context.IDENTIFIER();
             var value = Visit(context.expression());
-
             foreach (var identifier in identifiers)
             {
                 _runtimeData.AssignVariable(identifier.GetText(), value, context.Start.Line);
@@ -80,7 +78,7 @@ namespace CODEInterpreter.Classes.Visitor
 
             if ((bool)result == true)
             {
-                Visit(context.else_block());
+                Visit(context.if_code_block());
                 return true;
             }
             else
@@ -135,25 +133,66 @@ namespace CODEInterpreter.Classes.Visitor
                 {
                     return false;
                 }
+
                 result = Visit(context.expression());
             }
 
             return null;
         }
-        public override object? VisitWhile_code_block([NotNull] CodeParser.While_code_blockContext context)
+        public override object? VisitFor_block([NotNull] CodeParser.For_blockContext context)
         {
-            foreach (var whileLine in context.while_line())
+            if (context.for_initialization() is not null)
             {
-                if (whileLine.@break() is object)
+                Visit(context.for_initialization());
+            }
+
+            object? result = true;
+            if (context.for_condition() is not null)
+            {
+                result = Visit(context.for_condition().expression());
+            }
+
+            if (result is not object || result is not bool)
+            {
+                CodeErrorHandler.ThrowError(context.Start.Line, $"Cannot use non-BOOL expression \"{result}\" as condition.");
+            }
+
+            while ((bool)result == true)
+            {
+                if (Visit(context.for_code_block()) is object m && (bool)m == false)
                 {
                     return false;
                 }
-                if (whileLine.@continue() is object)
+
+                if (context.for_updation() is not null)
                 {
-                    return true;
+                    Visit(context.for_updation());
                 }
-                Visit(whileLine);
+
+                if (context.for_condition() is not null)
+                {
+                    result = Visit(context.for_condition().expression());
+                }
             }
+
+            return null;
+        }
+        public override object? VisitFor_initialization([NotNull] CodeParser.For_initializationContext context)
+        {
+            if (context.variable().expression() is object)
+            {
+                _runtimeData.AssignVariable(context.variable().IDENTIFIER().GetText(), Visit(context.variable().expression()), context.Start.Line);
+            }
+
+            return null;
+        }
+        public override object? VisitFor_updation([NotNull] CodeParser.For_updationContext context)
+        {
+            if (context.variable().expression() is object)
+            {
+                _runtimeData.AssignVariable(context.variable().IDENTIFIER().GetText(), Visit(context.variable().expression()), context.Start.Line);
+            }
+
             return null;
         }
         public override object? VisitConstant([NotNull] CodeParser.ConstantContext context)
@@ -193,13 +232,7 @@ namespace CODEInterpreter.Classes.Visitor
         {
             var variableName = context.IDENTIFIER().GetText();
 
-            if (!_runtimeData.CheckVariableExists(variableName))
-            {
-                CodeErrorHandler.ThrowError
-                (context.Start.Line, $"Unexpected token {variableName}. Variable {variableName} is not defined.");
-            }
-
-            return _runtimeData.GetValue(variableName) ?? "NULL";
+            return _runtimeData.GetValue(variableName, context.Start.Line) ?? "NULL";
         }
         public override object? VisitParenthesizedExpression([NotNull] CodeParser.ParenthesizedExpressionContext context)
         {
@@ -255,7 +288,20 @@ namespace CODEInterpreter.Classes.Visitor
                 "==" => _runtimeCalculator.Equal(left, right, context.Start.Line),
                 "<>" => _runtimeCalculator.NotEqual(left, right, context.Start.Line),
                 _ => throw new NotImplementedException()
-            }; ;
+            };
+        }
+        public override object? VisitBoolExpression([NotNull] CodeParser.BoolExpressionContext context)
+        {
+            var left = Visit(context.expression(0));
+            var right = Visit(context.expression(1));
+            var op = context.bool_op().GetText();
+
+            return op switch
+            {
+                "AND" => _runtimeCalculator.And(left, right, context.Start.Line),
+                "OR" => _runtimeCalculator.Or(left, right, context.Start.Line),
+                _ => throw new NotImplementedException()
+            };
         }
         public override object? VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
         {

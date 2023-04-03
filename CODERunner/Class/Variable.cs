@@ -1,11 +1,4 @@
-﻿using Antlr4.Runtime.Atn;
-using CODEInterpreter.Classes.ErrorHandling;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CODEInterpreter.Classes.ErrorHandling;
 
 namespace CODEInterpreter.CODERunner.Class
 {
@@ -27,27 +20,29 @@ namespace CODEInterpreter.CODERunner.Class
                 return;
             }
 
+            var StringValue = value is bool ? value.ToString().ToUpper() : value.ToString();
+
             try
             {
                 switch (DataType)
                 {
                     case "INT":
-                        Value = int.Parse(value.ToString()!);
+                        Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
-                        Value = float.Parse(value.ToString()!);
+                        Value = float.Parse(StringValue);
                         break;
                     case "CHAR":
-                        Value = char.Parse(value.ToString()!);
+                        Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(value.ToString()!);
+                        Value = value.ToString()!.ToUpper();
                         break;
                 }
             }
             catch (Exception ex)
             {
-                CodeErrorHandler.ThrowError(line, $"Cannot convert {value} to {dataType}");
+                CodeErrorHandler.ThrowError(line, $"Cannot convert {StringValue} to {dataType}");
             }
         }
         public void AssignVariable(object? value)
@@ -57,28 +52,29 @@ namespace CODEInterpreter.CODERunner.Class
                 Value = null;
                 return;
             }
-
+            
+            var StringValue = value is bool ? value.ToString().ToUpper() : value.ToString();
             try
             {
                 switch (DataType)
                 {
                     case "INT":
-                        Value = int.Parse(value.ToString()!);
+                        Value = int.Parse(StringValue);
                         break;
                     case "FLOAT":
-                        Value = float.Parse(value.ToString()!);
+                        Value = float.Parse(StringValue);
                         break;
                     case "CHAR":
-                        Value = char.Parse(value.ToString()!);
+                        Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = bool.Parse(value.ToString()!);
+                        Value = value.ToString()!.ToUpper();
                         break;
                 }
             }
             catch (Exception ex)
             {
-                CodeErrorHandler.ThrowError(Line, $"Cannot convert '{value}' to {DataType}");
+                CodeErrorHandler.ThrowError(Line, $"Cannot convert '{StringValue}' to {DataType}");
             }
         }
     }

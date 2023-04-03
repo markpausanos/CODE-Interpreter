@@ -22,22 +22,14 @@ namespace CODEInterpreter.Classes.ValidKeywords
             {
                 return "BOOL";
             }
+            else if (obj is string)
+            {
+                return "STRING";
+            }
             else
             {
                 return "NULL";
             }
-        }
-        public bool? Not(object? expression, int line)
-        {
-            if (expression is object && expression is bool)
-            {
-                return !((bool)expression);
-            }
-
-            CodeErrorHandler.ThrowError
-            (line, $"Unsupported operand 'NOT' for type {GetTypeObject(expression)}");
-
-            return null;
         }
         public object? Unary(object? expression, string symbol, int line)
         {
@@ -52,7 +44,7 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             if (expression is float && expression is object)
             {
-                expression = float.Parse(expression.ToString());
+                expression = float.Parse(expression.ToString()!);
 
                 return multiplier * (float)expression;
             }
@@ -323,7 +315,6 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
-
         public bool? LessThanOrEqualTo(object? left, object? right, int line)
         {
             if (left is int l && right is int r)
@@ -366,7 +357,6 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
-
         public bool? Equal(object? left, object? right, int line)
         {
             if (left is int l && right is int r)
@@ -409,7 +399,6 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
-
         public bool? NotEqual(object? left, object? right, int line)
         {
             if (left is int l && right is int r)
@@ -452,7 +441,18 @@ namespace CODEInterpreter.Classes.ValidKeywords
 
             return null;
         }
+        public bool? Not(object? expression, int line)
+        {
+            if (expression is object && expression is bool)
+            {
+                return !((bool)expression);
+            }
 
+            CodeErrorHandler.ThrowError
+            (line, $"Unsupported operand 'NOT' for type {GetTypeObject(expression)}");
+
+            return null;
+        }
         public bool? And(object? left, object? right, int line)
         {
             if (left is bool l && right is bool r)
@@ -474,7 +474,6 @@ namespace CODEInterpreter.Classes.ValidKeywords
             ThrowErrorInCalculator(left, right, "OR", line);
             return null;
         }
-
         public object? Concatenation(object? left, object? right, int line)
         {
             if (left is object && right is object)
