@@ -36,7 +36,7 @@ namespace CODEInterpreter.CODERunner.Class
                         Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = Value.ToString()!.ToUpper();
+                        Value = value.ToString()!.ToUpper();
                         break;
                 }
             }
@@ -68,7 +68,7 @@ namespace CODEInterpreter.CODERunner.Class
                         Value = char.Parse(StringValue);
                         break;
                     case "BOOL":
-                        Value = Value.ToString()!.ToUpper();
+                        Value = value.ToString()!.ToUpper();
                         break;
                 }
             }
